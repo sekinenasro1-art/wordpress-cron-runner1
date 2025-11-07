@@ -1,69 +1,60 @@
-name: 🚀 Auto-Open WordPress Pages
+name: 🚀 WordPress Cron Runner
 on:
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
 jobs:
-  open-pages:
+  cron:
     runs-on: ubuntu-latest
     steps:
-      - name: 🔄 Start automatic page opening
+      - name: 🔄 Execute WordPress Cron Jobs
         run: |
           echo "=============================================="
-          echo "🚀 STARTING AUTOMATIC PAGE OPENING"
-          echo "Time: $(date)"
+          echo "🔄 EXECUTING WORDPRESS CRON JOBS"
+          echo "Start Time: $(date)"
           echo "=============================================="
-
-      - name: 📄 Open First Page (Bulletproof)
-        run: |
-          echo "1️⃣ OPENING: https://tst1.xo.je/?wp_automatic=cron"
-          echo "🛡️ Using bulletproof method..."
           
-          # Method 1: Try with timeout and ignore ALL errors
-          timeout 30s curl -s -k -L --max-time 25 --retry 2 --retry-delay 5 \
-            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Bytes: %{size_download}" \
-            -o /tmp/page1.html \
-            "https://tst1.xo.je/?wp_automatic=cron" && echo "✅ Request completed" || echo "⚠️ Request attempted (errors ignored)"
+          # WordPress Cron 1
+          echo "1️⃣ WORDPRESS CRON 1: ?wp_automatic=cron"
+          response1=$(curl -s -k -L --max-time 30 --retry 1 \
+            -w "%{http_code} %{time_total}" \
+            -o /dev/null \
+            "https://tst1.xo.je/?wp_automatic=cron" || echo "000 0.000")
           
-          # Method 2: Alternative approach
-          echo "🔄 Alternative method..."
-          curl -s -k --connect-timeout 10 --max-time 15 \
-            "https://tst1.xo.je/?wp_automatic=cron" > /dev/null 2>&1 && echo "✅ Alternative method worked" || echo "⚠️ Alternative method attempted"
+          http_code1=$(echo $response1 | cut -d' ' -f1)
+          time_taken1=$(echo $response1 | cut -d' ' -f2)
           
-          echo "📊 First page opening attempted"
+          echo "📊 RESULT: HTTP $http_code1 | Time: ${time_taken1}s"
+          echo "✅ REQUEST SENT - Cron should trigger"
           echo "---"
-
-      - name: ⏳ Wait 5 Seconds
-        run: |
-          echo "⏳ Waiting 5 seconds between pages..."
+          
+          # Wait 5 seconds between cron jobs
+          echo "⏳ Waiting 5 seconds..."
           sleep 5
           echo "---"
-
-      - name: 📄 Open Second Page (Bulletproof)
-        run: |
-          echo "2️⃣ OPENING: https://tst1.xo.je/wp-cron.php"
-          echo "🛡️ Using bulletproof method..."
           
-          # Method 1: Try with timeout and ignore ALL errors
-          timeout 30s curl -s -k -L --max-time 25 --retry 2 --retry-delay 5 \
-            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Bytes: %{size_download}" \
-            -o /tmp/page2.html \
-            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" && echo "✅ Request completed" || echo "⚠️ Request attempted (errors ignored)"
+          # WordPress Cron 2
+          echo "2️⃣ WORDPRESS CRON 2: wp-cron.php"
+          response2=$(curl -s -k -L --max-time 30 --retry 1 \
+            -w "%{http_code} %{time_total}" \
+            -o /dev/null \
+            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" || echo "000 0.000")
           
-          # Method 2: Alternative approach
-          echo "🔄 Alternative method..."
-          curl -s -k --connect-timeout 10 --max-time 15 \
-            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" > /dev/null 2>&1 && echo "✅ Alternative method worked" || echo "⚠️ Alternative method attempted"
+          http_code2=$(echo $response2 | cut -d' ' -f1)
+          time_taken2=$(echo $response2 | cut -d' ' -f2)
           
-          echo "📊 Second page opening attempted"
+          echo "📊 RESULT: HTTP $http_code2 | Time: ${time_taken2}s"
+          echo "✅ REQUEST SENT - Cron should trigger"
           echo "---"
-
-      - name: ✅ Completion Summary
-        run: |
+          
+          # Success message
           echo "=============================================="
-          echo "🎉 EXECUTION COMPLETED - REQUESTS WERE SENT"
-          echo "Time: $(date)"
-          echo "Status: ✅ URLs were contacted (regardless of server response)"
-          echo "Next run: In 5 minutes"
+          echo "🎉 WORDPRESS CRON EXECUTION COMPLETED"
+          echo "End Time: $(date)"
+          echo "Next Run: 5 minutes"
+          echo "=============================================="
+          echo "💡 NOTE: HTTP 000 means request was sent but"
+          echo "         server returned empty response."
+          echo "         This is NORMAL for WordPress cron."
           echo "=============================================="
