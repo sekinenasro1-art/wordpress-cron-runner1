@@ -1,9 +1,7 @@
 name: 🚀 Auto-Open WordPress Pages
 on:
   schedule:
-    # Runs every 5 minutes, 24/7
     - cron: '*/5 * * * *'
-  # Allows manual triggering
   workflow_dispatch:
 
 jobs:
@@ -16,22 +14,24 @@ jobs:
           echo "🚀 STARTING AUTOMATIC PAGE OPENING"
           echo "Time: $(date)"
           echo "=============================================="
-          
-      - name: 📄 Open First Page
+
+      - name: 📄 Open First Page (Bulletproof)
         run: |
           echo "1️⃣ OPENING: https://tst1.xo.je/?wp_automatic=cron"
-          start_time=$(date +%s)
+          echo "🛡️ Using bulletproof method..."
           
-          # Open first page with detailed logging
-          response=$(curl -s -k -L -o /dev/null \
-            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Size: %{size_download} bytes" \
-            "https://tst1.xo.je/?wp_automatic=cron" 2>&1 || echo "ERROR: Request failed")
+          # Method 1: Try with timeout and ignore ALL errors
+          timeout 30s curl -s -k -L --max-time 25 --retry 2 --retry-delay 5 \
+            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Bytes: %{size_download}" \
+            -o /tmp/page1.html \
+            "https://tst1.xo.je/?wp_automatic=cron" && echo "✅ Request completed" || echo "⚠️ Request attempted (errors ignored)"
           
-          end_time=$(date +%s)
-          duration=$((end_time - start_time))
+          # Method 2: Alternative approach
+          echo "🔄 Alternative method..."
+          curl -s -k --connect-timeout 10 --max-time 15 \
+            "https://tst1.xo.je/?wp_automatic=cron" > /dev/null 2>&1 && echo "✅ Alternative method worked" || echo "⚠️ Alternative method attempted"
           
-          echo "✅ RESULT: $response"
-          echo "⏱️  DURATION: ${duration}s"
+          echo "📊 First page opening attempted"
           echo "---"
 
       - name: ⏳ Wait 5 Seconds
@@ -40,27 +40,30 @@ jobs:
           sleep 5
           echo "---"
 
-      - name: 📄 Open Second Page  
+      - name: 📄 Open Second Page (Bulletproof)
         run: |
           echo "2️⃣ OPENING: https://tst1.xo.je/wp-cron.php"
-          start_time=$(date +%s)
+          echo "🛡️ Using bulletproof method..."
           
-          # Open second page with detailed logging
-          response=$(curl -s -k -L -o /dev/null \
-            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Size: %{size_download} bytes" \
-            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" 2>&1 || echo "ERROR: Request failed")
+          # Method 1: Try with timeout and ignore ALL errors
+          timeout 30s curl -s -k -L --max-time 25 --retry 2 --retry-delay 5 \
+            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Bytes: %{size_download}" \
+            -o /tmp/page2.html \
+            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" && echo "✅ Request completed" || echo "⚠️ Request attempted (errors ignored)"
           
-          end_time=$(date +%s)
-          duration=$((end_time - start_time))
+          # Method 2: Alternative approach
+          echo "🔄 Alternative method..."
+          curl -s -k --connect-timeout 10 --max-time 15 \
+            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" > /dev/null 2>&1 && echo "✅ Alternative method worked" || echo "⚠️ Alternative method attempted"
           
-          echo "✅ RESULT: $response"
-          echo "⏱️  DURATION: ${duration}s"
+          echo "📊 Second page opening attempted"
           echo "---"
 
       - name: ✅ Completion Summary
         run: |
           echo "=============================================="
-          echo "🎉 AUTOMATIC EXECUTION COMPLETED SUCCESSFULLY"
+          echo "🎉 EXECUTION COMPLETED - REQUESTS WERE SENT"
           echo "Time: $(date)"
+          echo "Status: ✅ URLs were contacted (regardless of server response)"
           echo "Next run: In 5 minutes"
           echo "=============================================="
