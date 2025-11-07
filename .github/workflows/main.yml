@@ -1,0 +1,66 @@
+name: 🚀 Auto-Open WordPress Pages
+on:
+  schedule:
+    # Runs every 5 minutes, 24/7
+    - cron: '*/5 * * * *'
+  # Allows manual triggering
+  workflow_dispatch:
+
+jobs:
+  open-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🔄 Start automatic page opening
+        run: |
+          echo "=============================================="
+          echo "🚀 STARTING AUTOMATIC PAGE OPENING"
+          echo "Time: $(date)"
+          echo "=============================================="
+          
+      - name: 📄 Open First Page
+        run: |
+          echo "1️⃣ OPENING: https://tst1.xo.je/?wp_automatic=cron"
+          start_time=$(date +%s)
+          
+          # Open first page with detailed logging
+          response=$(curl -s -k -L -o /dev/null \
+            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Size: %{size_download} bytes" \
+            "https://tst1.xo.je/?wp_automatic=cron" 2>&1 || echo "ERROR: Request failed")
+          
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+          
+          echo "✅ RESULT: $response"
+          echo "⏱️  DURATION: ${duration}s"
+          echo "---"
+
+      - name: ⏳ Wait 5 Seconds
+        run: |
+          echo "⏳ Waiting 5 seconds between pages..."
+          sleep 5
+          echo "---"
+
+      - name: 📄 Open Second Page  
+        run: |
+          echo "2️⃣ OPENING: https://tst1.xo.je/wp-cron.php"
+          start_time=$(date +%s)
+          
+          # Open second page with detailed logging
+          response=$(curl -s -k -L -o /dev/null \
+            -w "HTTP Status: %{http_code} | Time: %{time_total}s | Size: %{size_download} bytes" \
+            "https://tst1.xo.je/wp-cron.php?doing_wp_cron%20%3E%20/dev/null%202%3E&1" 2>&1 || echo "ERROR: Request failed")
+          
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+          
+          echo "✅ RESULT: $response"
+          echo "⏱️  DURATION: ${duration}s"
+          echo "---"
+
+      - name: ✅ Completion Summary
+        run: |
+          echo "=============================================="
+          echo "🎉 AUTOMATIC EXECUTION COMPLETED SUCCESSFULLY"
+          echo "Time: $(date)"
+          echo "Next run: In 5 minutes"
+          echo "=============================================="
